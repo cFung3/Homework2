@@ -36,35 +36,41 @@ public class MainActivity extends AppCompatActivity {
         imgView = findViewById(R.id.imageView);
         Button btn = findViewById(R.id.button);
 
-
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                Bitmap bit = ((BitmapDrawable) imgView.getDrawable()).getBitmap();
-                Mat mat = new Mat(bit.getWidth(), bit.getHeight(), CvType.CV_8UC4);
+                final Bitmap bit = ((BitmapDrawable) imgView.getDrawable()).getBitmap();
                 String stringResultFromQRCode = decodeQRCode(bit);
                 String[] lines = stringResultFromQRCode.split(";");
+
+                Mat img = null;
+                Mat mat = new Mat(bit.getWidth(), bit.getHeight(), CvType.CV_8UC4);
+                Utils.matToBitmap(mat, bit);
 
                 int lineWidth = 3;
                 Scalar lineColor = new Scalar(255,0,0,255);
                 int count = 0;
 
-                while (count <= lines.length){
+                while (count < lines.length){
                     Point[] poi = { new Point(), new Point()};
                     String[] str = lines[count].split(" ");
                     for (int i = 0; i < str.length; i++){
                         String[] x = str[i].split(",");
-                        poi[i] = new Point (Integer.parseInt(x[0]),Integer.parseInt(x[1]));
-                        count ++;
+                        poi[i] = new Point (Integer.valueOf (x[0]),Integer.valueOf(x[1]));
+
                     }
 
+                    count ++;
                     Imgproc.line(mat, poi[0], poi[1], lineColor, lineWidth);
-                    Bitmap bitmap = Bitmap.createBitmap(mat.width(), mat.height(), Bitmap.Config.ARGB_8888);
-                    Utils.matToBitmap(mat, bitmap);
-                    ImageView imgView = findViewById(R.id.imageView);
-                    imgView.setImageBitmap(bitmap);
+
                 }
+
+                Bitmap bitmap = Bitmap.createBitmap(mat.width(), mat.height(), Bitmap.Config.ARGB_8888);
+                Utils.matToBitmap(mat, bitmap);
+                ImageView imgView = findViewById(R.id.imageView);
+                imgView.setImageBitmap(bitmap);
+
             }
         });
     }
